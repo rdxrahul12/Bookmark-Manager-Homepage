@@ -2,6 +2,13 @@
 
 A beautiful, Netflix-inspired bookmark manager that works offline. Organize your bookmarks by categories and access them quickly with a clean, modern interface.
 
+## How to use
+- download zip, extract
+- make the index.html as home page
+- download new tab redirect
+- add page
+- Enjoy new Homepage
+
 ## Features
 
 - 🏷️ Categorize bookmarks for better organization
