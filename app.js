@@ -27,10 +27,28 @@ let currentCategoryId = null;
 let editMode = { active: false, id: null };
 let confirmCallback = null;
 
-// Initialize the app
+// Initialize the application
 function init() {
+    // Load and display bookmarks with animation
+    loadBookmarks().then(() => {
+        // Animate bookmarks after loading
+        const bookmarks = document.querySelectorAll('.bookmark-item');
+        bookmarks.forEach((bookmark, index) => {
+            // Set initial state
+            bookmark.style.opacity = '0';
+            bookmark.style.transform = 'scale(0.5)';
+            
+            // Animate in with staggered delay
+            setTimeout(() => {
+                bookmark.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                bookmark.style.opacity = '1';
+                bookmark.style.transform = 'scale(1)';
+            }, index * 50); // 50ms delay between each item
+        });
+    });
+    
+    // Load and display categories
     loadCategories();
-    loadBookmarks();
     setupEventListeners();
 }
 
@@ -181,8 +199,31 @@ function deleteCategory(categoryId) {
     }
 }
 
+// Animate bookmarks with a staggered effect
+function animateBookmarks() {
+    const bookmarks = document.querySelectorAll('.bookmark-item');
+    bookmarks.forEach((bookmark, index) => {
+        // Reset initial state
+        bookmark.style.opacity = '0';
+        bookmark.style.transform = 'scale(0.5)';
+        
+        // Clear any existing transitions
+        bookmark.style.transition = 'none';
+        
+        // Force reflow to ensure the reset takes effect
+        void bookmark.offsetWidth;
+        
+        // Animate in with staggered delay
+        setTimeout(() => {
+            bookmark.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            bookmark.style.opacity = '1';
+            bookmark.style.transform = 'scale(1)';
+        }, index * 50);
+    });
+}
+
 // Load and display bookmarks
-function loadBookmarks(categoryId = null) {
+async function loadBookmarks(categoryId = null) {
     const bookmarks = dataManager.getBookmarks(categoryId);
     const category = categoryId ? dataManager.getCategoryById(categoryId) : null;
     
@@ -203,11 +244,11 @@ function loadBookmarks(categoryId = null) {
         <div class="bookmark-item group relative transform transition-all duration-300 hover:scale-105 hover:z-10" data-bookmark-id="${bookmark.id}">
             <a href="${bookmark.url}" target="_blank" rel="noopener noreferrer" 
                class="flex flex-col items-center p-2 bg-gray-950 rounded-lg hover:bg-gray-800/80 transition-all duration-300 h-full border-2 border-transparent hover:border-netflix-red shadow-lg hover:shadow-xl hover:shadow-black/20">
-                <div class="w-14 h-14 mb-3 flex items-center justify-center bg-gray-800 rounded-lg overflow-hidden transition-all duration-300 group-hover:w-14 group-hover:h-14">
+                <div class="w-16 h-16 mb-3 flex items-center justify-center bg-transparent rounded-lg overflow-hidden transition-all duration-300 group-hover:w-18 group-hover:h-18">
                     <img 
-                        src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(bookmark.url)}&sz=128" 
+                        src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(bookmark.url)}&sz=256" 
                         alt="" 
-                        class="w-8 h-8 object-contain"
+                        class="w-12 h-12 object-contain"
                         onerror="this.onerror=null; 
                             this.src='https://icons.duckduckgo.com/ip2/' + new URL(bookmark.url).hostname + '.ico';
                             this.onerror=function(){ 
@@ -236,6 +277,11 @@ function loadBookmarks(categoryId = null) {
             </div>
         </div>
     `).join('');
+    
+    // Animate the bookmarks after they're added to the DOM
+    requestAnimationFrame(() => {
+        animateBookmarks();
+    });
     
     // Add event listeners to bookmark actions
     document.querySelectorAll('.edit-bookmark').forEach(btn => {
