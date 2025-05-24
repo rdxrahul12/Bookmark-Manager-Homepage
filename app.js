@@ -243,7 +243,8 @@ async function loadBookmarks(categoryId = null) {
     bookmarksGrid.innerHTML = bookmarks.map(bookmark => `
         <div class="bookmark-item group relative transform transition-all duration-300 hover:scale-105 hover:z-10" data-bookmark-id="${bookmark.id}">
             <a href="${bookmark.url}" target="_blank" rel="noopener noreferrer" 
-               class="flex flex-col items-center p-2 bg-gray-950 rounded-lg hover:bg-gray-800/80 transition-all duration-300 h-full border-2 border-transparent hover:border-netflix-red shadow-lg hover:shadow-xl hover:shadow-black/20">
+               class="flex flex-col items-center p-2 bg-gray-950 rounded-5xl
+               hover:bg-gray-800/80 transition-all duration-300 h-full border-2 border-transparent hover:border-netflix-red shadow-lg hover:shadow-xl hover:shadow-black/20">
                 <div class="w-16 h-16 mb-3 flex items-center justify-center bg-transparent rounded-lg overflow-hidden transition-all duration-300 group-hover:w-18 group-hover:h-18">
                     <img 
                         src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(bookmark.url)}&sz=256" 
