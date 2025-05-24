@@ -249,7 +249,7 @@ async function loadBookmarks(categoryId = null) {
                     <img 
                         src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(bookmark.url)}&sz=256" 
                         alt="" 
-                        class="w-12 h-12 object-contain"
+                        class="w-12 h-12 rounded-3xl object-contain"
                         onerror="this.onerror=null; 
                             this.src='https://icons.duckduckgo.com/ip2/' + new URL(bookmark.url).hostname + '.ico';
                             this.onerror=function(){ 
