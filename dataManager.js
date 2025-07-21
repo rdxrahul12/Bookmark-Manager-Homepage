@@ -16,36 +16,43 @@ class DataManager {
 
     initializeDefaultData() {
         if (!this.data) {
-            this.data = {
-                categories: [
-                    { id: this.generateId(), name: 'Work' },
-                    { id: this.generateId(), name: 'Social' },
-                    { id: this.generateId(), name: 'Entertainment' }
-                ],
-                bookmarks: [
-                    { 
-                        id: this.generateId(), 
-                        name: 'GitHub', 
-                        url: 'https://github.com', 
-                        categoryId: this.data?.categories[0]?.id || ''
-                    },
-                    { 
-                        id: this.generateId(), 
-                        name: 'Twitter', 
-                        url: 'https://twitter.com', 
-                        categoryId: this.data?.categories[1]?.id || ''
-                    },
-                    { 
-                        id: this.generateId(), 
-                        name: 'YouTube', 
-                        url: 'https://youtube.com', 
-                        categoryId: this.data?.categories[2]?.id || ''
-                    }
-                ]
-            };
-            this.saveData();
+        this.data = {
+        categories: [
+        {id: this.generateId(), name: 'Work'},
+        {id: this.generateId(), name: 'Social'},
+        {id: this.generateId(), name: 'Entertainment'},
+        {id: this.generateId(), name: 'Learning'},
+        {id: this.generateId(), name: 'Utilities'}
+        ],
+        bookmarks: []
+        };
+        let c=this.data.categories;
+        this.data.bookmarks=[
+        {id:this.generateId(),name:'GitHub',url:'https://github.com',categoryId:c[0].id},
+        {id:this.generateId(),name:'Stack Overflow',url:'https://stackoverflow.com',categoryId:c[0].id},
+        {id:this.generateId(),name:'LinkedIn',url:'https://linkedin.com',categoryId:c[0].id},
+        {id:this.generateId(),name:'Notion',url:'https://notion.so',categoryId:c[0].id},
+        {id:this.generateId(),name:'Slack',url:'https://slack.com',categoryId:c[0].id},
+        {id:this.generateId(),name:'Twitter',url:'https://twitter.com',categoryId:c[1].id},
+        {id:this.generateId(),name:'Reddit',url:'https://reddit.com',categoryId:c[1].id},
+        {id:this.generateId(),name:'Facebook',url:'https://facebook.com',categoryId:c[1].id},
+        {id:this.generateId(),name:'Instagram',url:'https://instagram.com',categoryId:c[1].id},
+        {id:this.generateId(),name:'Discord',url:'https://discord.com',categoryId:c[1].id},
+        {id:this.generateId(),name:'YouTube',url:'https://youtube.com',categoryId:c[2].id},
+        {id:this.generateId(),name:'Netflix',url:'https://netflix.com',categoryId:c[2].id},
+        {id:this.generateId(),name:'Spotify',url:'https://spotify.com',categoryId:c[2].id},
+        {id:this.generateId(),name:'Twitch',url:'https://twitch.tv',categoryId:c[2].id},
+        {id:this.generateId(),name:'Hotstar',url:'https://hotstar.com',categoryId:c[2].id},
+        {id:this.generateId(),name:'Khan Academy',url:'https://khanacademy.org',categoryId:c[3].id},
+        {id:this.generateId(),name:'Coursera',url:'https://coursera.org',categoryId:c[3].id},
+        {id:this.generateId(),name:'GeeksforGeeks',url:'https://geeksforgeeks.org',categoryId:c[3].id},
+        {id:this.generateId(),name:'W3Schools',url:'https://w3schools.com',categoryId:c[3].id},
+        {id:this.generateId(),name:'Google Drive',url:'https://drive.google.com',categoryId:c[4].id}
+        ];
+        this.saveData();
         }
-    }
+        }
+        
 
     generateId() {
         return Date.now().toString(36) + Math.random().toString(36).substr(2);
