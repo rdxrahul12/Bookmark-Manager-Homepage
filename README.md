@@ -1,5 +1,7 @@
 # Offline Bookmark Manager
 Use : https://rdxrahul12.github.io/Bookmark-Manager-Homepage/
+<img width="1902" height="1076" alt="image" src="https://github.com/user-attachments/assets/741b0211-e730-4151-98af-12c5ae439ff8" />
+
 
 A beautiful, Netflix-inspired bookmark manager that works offline. Organize your bookmarks by categories and access them quickly with a clean, modern interface.
 
