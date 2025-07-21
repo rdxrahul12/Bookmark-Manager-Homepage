@@ -18,11 +18,11 @@ class DataManager {
         if (!this.data) {
         this.data = {
         categories: [
-        {id: this.generateId(), name: 'Work'},
-        {id: this.generateId(), name: 'Social'},
-        {id: this.generateId(), name: 'Entertainment'},
-        {id: this.generateId(), name: 'Learning'},
-        {id: this.generateId(), name: 'Utilities'}
+            {id:this.generateId(),name:'💼 Work'},
+            {id:this.generateId(),name:'💬 Social'},
+            {id:this.generateId(),name:'🎮 Entertainment'},
+            {id:this.generateId(),name:'📚 Learning'},
+            {id:this.generateId(),name:'🛠️ Utilities'}
         ],
         bookmarks: []
         };
