@@ -1,7 +1,11 @@
 @import "tailwindcss";
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+body {
+    overflow-x: hidden;
+}
 
 /* Visual feedback for clicked bookmarks */
 .bookmark-item.clicked,

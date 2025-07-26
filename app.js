@@ -75,8 +75,45 @@ function updateFrequentlyUsed() {
     `).join('');
 }
 
+// Update time and date display
+function updateDateTime() {
+    const now = new Date();
+    const timeElement = document.getElementById('time');
+    const dayElement = document.getElementById('day');
+    const dateElement = document.getElementById('date');
+    
+    if (timeElement) {
+        // Format time as 12-hour with AM/PM
+        let hours = now.getHours();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // the hour '0' should be '12'
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        timeElement.textContent = `${hours}:${minutes} ${ampm}`;
+    }
+    
+    if (dayElement) {
+        // Format day of week (e.g., 'Monday')
+        const options = { weekday: 'long' };
+        dayElement.textContent = now.toLocaleDateString('en-US', options);
+    }
+    
+    if (dateElement) {
+        // Format date as 'DD/MM/YYYY'
+        const day = now.getDate().toString().padStart(2, '0');
+        const month = (now.getMonth() + 1).toString().padStart(2, '0');
+        const year = now.getFullYear();
+        dateElement.textContent = `${day}/${month}/${year}`;
+    }
+}
+
 // Initialize the application
 function init() {
+    // Initialize date and time
+    updateDateTime();
+    // Update time every minute
+    setInterval(updateDateTime, 60000);
+    
     // Load and display bookmarks with animation
     loadBookmarks().then(() => {
         // Initialize frequently used section
