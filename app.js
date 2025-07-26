@@ -27,10 +27,60 @@ let currentCategoryId = null;
 let editMode = { active: false, id: null };
 let confirmCallback = null;
 
+// Track when a bookmark is opened
+function trackBookmarkUsage(bookmarkId) {
+    dataManager.incrementUsage(bookmarkId);
+    // Update the UI to reflect the new usage
+    updateFrequentlyUsed();
+    
+    // Also update the bookmark's last used timestamp in the current view
+    const bookmarkElement = document.querySelector(`[data-bookmark-id="${bookmarkId}"]`);
+    if (bookmarkElement) {
+        bookmarkElement.classList.add('just-used');
+        setTimeout(() => bookmarkElement.classList.remove('just-used'), 300);
+    }
+}
+
+// Update the frequently used bookmarks section
+function updateFrequentlyUsed() {
+    const frequentlyUsedContainer = document.getElementById('frequentlyUsed');
+    const frequentlyUsed = dataManager.getFrequentlyUsed();
+    
+    frequentlyUsedContainer.innerHTML = frequentlyUsed.map(bookmark => `
+        <div class="relative group cursor-pointer">
+            <a href="${bookmark.url}" target="_blank" 
+               class="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full overflow-hidden 
+                      bg-gray-900 hover:bg-gray-800 transition-all duration-200 border-2 border-transparent 
+                      hover:border-netflix-red relative"
+               onclick="trackBookmarkUsage('${bookmark.id}')">
+                <img 
+                    src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(bookmark.url)}&sz=256" 
+                    alt="${bookmark.name}" 
+                    class="w-8 h-8 object-contain"
+                    onerror="this.onerror=null; 
+                        this.src='https://icons.duckduckgo.com/ip2/' + new URL('${bookmark.url}').hostname + '.ico';
+                        this.onerror=function(){ 
+                            this.onerror=null; 
+                            this.src='https://' + new URL('${bookmark.url}').hostname + '/favicon.ico';
+                            this.onerror=function(){ this.style.display='none'; }
+                        };">
+            </a>
+            <div class="absolute z-10 px-3 py-1.5 mt-2 text-sm text-white bg-gray-800 rounded shadow-lg 
+                        opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200
+                        top-full left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+                ${bookmark.name}
+                <div class="absolute top-0 left-1/2 w-2.5 h-2.5 -mt-1 -ml-1.5 transform -rotate-45 bg-gray-800"></div>
+            </div>
+        </div>
+    `).join('');
+}
+
 // Initialize the application
 function init() {
     // Load and display bookmarks with animation
     loadBookmarks().then(() => {
+        // Initialize frequently used section
+        updateFrequentlyUsed();
         // Animate bookmarks after loading
         const bookmarks = document.querySelectorAll('.bookmark-item');
         bookmarks.forEach((bookmark, index) => {
@@ -304,6 +354,28 @@ async function loadBookmarks(categoryId = null) {
                 'Are you sure you want to delete this bookmark?',
                 () => deleteBookmark(bookmarkId)
             );
+        });
+    });
+    
+    // Add click handler for bookmark links to track usage
+    document.querySelectorAll('.bookmark-item > a').forEach(link => {
+        link.addEventListener('click', (e) => {
+            // Don't track if clicking on the delete button
+            if (e.target.closest('.delete-bookmark') || e.target.closest('.edit-bookmark')) {
+                return;
+            }
+            
+            const bookmarkItem = link.closest('.bookmark-item');
+            const bookmarkId = bookmarkItem.dataset.bookmarkId;
+            if (bookmarkId) {
+                trackBookmarkUsage(bookmarkId);
+            }
+            
+            // Add a visual feedback class
+            bookmarkItem.classList.add('clicked');
+            setTimeout(() => {
+                bookmarkItem.classList.remove('clicked');
+            }, 200);
         });
     });
 }

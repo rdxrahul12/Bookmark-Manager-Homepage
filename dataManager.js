@@ -97,6 +97,42 @@ class DataManager {
         return false;
     }
 
+    // Track bookmark usage
+    incrementUsage(bookmarkId) {
+        const bookmark = this.data.bookmarks.find(b => b.id === bookmarkId);
+        if (bookmark) {
+            // Initialize if not exists
+            if (bookmark.usageCount === undefined) {
+                bookmark.usageCount = 0;
+                bookmark.lastUsed = 0;
+            }
+            // Increment usage count and update last used timestamp
+            bookmark.usageCount++;
+            bookmark.lastUsed = Date.now();
+            this.saveData();
+        }
+    }
+
+    // Get most frequently used bookmarks
+    getFrequentlyUsed(limit = 6) {
+        // Make sure all bookmarks have usage data
+        const bookmarksWithUsage = this.data.bookmarks.map(bookmark => ({
+            ...bookmark,
+            usageCount: bookmark.usageCount || 0,
+            lastUsed: bookmark.lastUsed || 0
+        }));
+
+        // Sort by usage count (descending), then by last used (newest first)
+        return [...bookmarksWithUsage]
+            .sort((a, b) => {
+                if (b.usageCount !== a.usageCount) {
+                    return b.usageCount - a.usageCount;
+                }
+                return b.lastUsed - a.lastUsed;
+            })
+            .slice(0, limit);
+    }
+
     // Bookmark methods
     getBookmarks(categoryId = null) {
         if (categoryId) {
