@@ -26,13 +26,77 @@ const bookmarkCategorySelect = document.getElementById('bookmarkCategory');
 let currentCategoryId = null;
 let editMode = { active: false, id: null };
 let confirmCallback = null;
+let draggedBookmarkId = null;
+
+// Generate a fallback icon with initials and gradient colors
+function generateFallbackIcon(name, url, isSmall = false) {
+    // Get initials (1-2 characters)
+    const words = name.trim().split(/\s+/);
+    let initials;
+    if (words.length >= 2) {
+        initials = words[0][0] + words[1][0];
+    } else {
+        initials = name.substring(0, Math.min(2, name.length));
+    }
+    initials = initials.toUpperCase();
+
+    // Generate consistent colors based on the name
+    const hash = name.split('').reduce((acc, char) => {
+        return char.charCodeAt(0) + ((acc << 5) - acc);
+    }, 0);
+
+    const hue = Math.abs(hash) % 360;
+    const saturation = 65 + (Math.abs(hash) % 20);
+    const lightness = 45 + (Math.abs(hash) % 15);
+
+    const color1 = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    const color2 = `hsl(${(hue + 30) % 360}, ${saturation}%, ${lightness - 10}%)`;
+
+    const className = isSmall ? 'fallback-icon-small' : 'fallback-icon';
+
+    return `
+        <div class="${className}" style="--icon-color-1: ${color1}; --icon-color-2: ${color2};">
+            ${initials}
+        </div>
+    `;
+}
+
+// Get favicon with fallback to generated icon
+function getFaviconHTML(bookmark, isSmall = false) {
+    const size = isSmall ? 'w-8 h-8' : 'w-12 h-12';
+    const imgId = `img-${bookmark.id}`;
+
+    return `
+        <img 
+            id="${imgId}"
+            src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(bookmark.url)}&sz=256" 
+            alt="${bookmark.name}" 
+            class="${size} object-contain rounded-lg"
+            onerror="handleIconError('${imgId}', '${bookmark.name.replace(/'/g, "\\'")}', '${bookmark.url}', ${isSmall})"
+            loading="lazy"
+        />
+    `;
+}
+
+// Handle icon loading errors
+function handleIconError(imgId, name, url, isSmall) {
+    const img = document.getElementById(imgId);
+    if (!img) return;
+
+    const parent = img.parentElement;
+    if (!parent) return;
+
+    // Replace the image with the fallback icon
+    const fallbackHTML = generateFallbackIcon(name, url, isSmall);
+    parent.innerHTML = fallbackHTML;
+}
 
 // Track when a bookmark is opened
 function trackBookmarkUsage(bookmarkId) {
     dataManager.incrementUsage(bookmarkId);
     // Update the UI to reflect the new usage
     updateFrequentlyUsed();
-    
+
     // Also update the bookmark's last used timestamp in the current view
     const bookmarkElement = document.querySelector(`[data-bookmark-id="${bookmarkId}"]`);
     if (bookmarkElement) {
@@ -45,7 +109,7 @@ function trackBookmarkUsage(bookmarkId) {
 function updateFrequentlyUsed() {
     const frequentlyUsedContainer = document.getElementById('frequentlyUsed');
     const frequentlyUsed = dataManager.getFrequentlyUsed();
-    
+
     frequentlyUsedContainer.innerHTML = frequentlyUsed.map(bookmark => `
         <div class="relative group cursor-pointer">
             <a href="${bookmark.url}" target="_blank" 
@@ -53,17 +117,7 @@ function updateFrequentlyUsed() {
                       bg-gray-900 hover:bg-gray-800 transition-all duration-200 border-2 border-transparent 
                       hover:border-netflix-red relative"
                onclick="trackBookmarkUsage('${bookmark.id}')">
-                <img 
-                    src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(bookmark.url)}&sz=256" 
-                    alt="${bookmark.name}" 
-                    class="w-8 h-8 object-contain"
-                    onerror="this.onerror=null; 
-                        this.src='https://icons.duckduckgo.com/ip2/' + new URL('${bookmark.url}').hostname + '.ico';
-                        this.onerror=function(){ 
-                            this.onerror=null; 
-                            this.src='https://' + new URL('${bookmark.url}').hostname + '/favicon.ico';
-                            this.onerror=function(){ this.style.display='none'; }
-                        };">
+                ${getFaviconHTML(bookmark, true)}
             </a>
             <div class="absolute z-10 px-3 py-1.5 mt-2 text-sm text-white bg-gray-800 rounded shadow-lg 
                         opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200
@@ -81,7 +135,7 @@ function updateDateTime() {
     const timeElement = document.getElementById('time');
     const dayElement = document.getElementById('day');
     const dateElement = document.getElementById('date');
-    
+
     if (timeElement) {
         // Format time as 12-hour with AM/PM
         let hours = now.getHours();
@@ -91,13 +145,13 @@ function updateDateTime() {
         const minutes = now.getMinutes().toString().padStart(2, '0');
         timeElement.textContent = `${hours}:${minutes} ${ampm}`;
     }
-    
+
     if (dayElement) {
         // Format day of week (e.g., 'Monday')
         const options = { weekday: 'long' };
         dayElement.textContent = now.toLocaleDateString('en-US', options);
     }
-    
+
     if (dateElement) {
         // Format date as 'DD/MM/YYYY'
         const day = now.getDate().toString().padStart(2, '0');
@@ -113,7 +167,7 @@ function init() {
     updateDateTime();
     // Update time every minute
     setInterval(updateDateTime, 60000);
-    
+
     // Load and display bookmarks with animation
     loadBookmarks().then(() => {
         // Initialize frequently used section
@@ -124,7 +178,7 @@ function init() {
             // Set initial state
             bookmark.style.opacity = '0';
             bookmark.style.transform = 'scale(0.5)';
-            
+
             // Animate in with staggered delay
             setTimeout(() => {
                 bookmark.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
@@ -133,7 +187,7 @@ function init() {
             }, index * 50); // 50ms delay between each item
         });
     });
-    
+
     // Load and display categories
     loadCategories();
     setupEventListeners();
@@ -143,22 +197,22 @@ function init() {
 function setupEventListeners() {
     // Add category button
     addCategoryBtn.addEventListener('click', () => openCategoryModal());
-    
+
     // Add bookmark button
     addBookmarkBtn.addEventListener('click', () => openBookmarkModal());
-    
+
     // Category form
     categoryForm.addEventListener('submit', handleCategorySubmit);
-    
+
     // Bookmark form
     bookmarkForm.addEventListener('submit', handleBookmarkSubmit);
-    
+
     // Modal close buttons
     document.getElementById('closeCategoryModal').addEventListener('click', () => closeModal(categoryModal));
     document.getElementById('closeBookmarkModal').addEventListener('click', () => closeModal(bookmarkModal));
     document.getElementById('cancelCategory').addEventListener('click', () => closeModal(categoryModal));
     document.getElementById('cancelBookmark').addEventListener('click', () => closeModal(bookmarkModal));
-    
+
     // Confirmation modal buttons
     document.getElementById('confirmCancel').addEventListener('click', () => closeModal(confirmModal));
     document.getElementById('confirmAction').addEventListener('click', () => {
@@ -167,7 +221,7 @@ function setupEventListeners() {
             closeModal(confirmModal);
         }
     });
-    
+
     // Close modals when clicking outside
     window.addEventListener('click', (e) => {
         if (e.target === categoryModal) closeModal(categoryModal);
@@ -179,14 +233,14 @@ function setupEventListeners() {
 // Load and display categories
 function loadCategories() {
     const categories = dataManager.getCategories();
-    
+
     // Add "All" category
     const allCategories = [{ id: null, name: 'All' }, ...categories];
-    
+
     categoriesContainer.innerHTML = allCategories.map(category => {
         const isActive = currentCategoryId === category.id;
         const isAllTab = category.id === null;
-        
+
         return `
             <div class="flex items-center group">
                 <div data-category-id="${category.id || ''}" 
@@ -211,26 +265,45 @@ function loadCategories() {
             </div>
         `;
     }).join('');
-    
+
     // Add event listeners to category tabs and edit buttons
     document.querySelectorAll('.category-tab').forEach(tab => {
         const categoryId = tab.dataset.categoryId || null;
         const isAllTab = categoryId === null;
-        
+
         // Handle category click (navigation)
         tab.addEventListener('click', (e) => {
             // Don't navigate if clicking the delete or edit button
-            if (e.target.closest('.delete-category-btn') || 
+            if (e.target.closest('.delete-category-btn') ||
                 e.target.closest('.edit-category-btn') ||
                 tab.querySelector('input')) {
                 return;
             }
-            
+
             currentCategoryId = categoryId;
             loadBookmarks(categoryId);
             loadCategories();
         });
-        
+
+        // Add drag-over and drop handlers for drag-and-drop
+        tab.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            tab.classList.add('drag-over');
+        });
+
+        tab.addEventListener('dragleave', (e) => {
+            e.stopPropagation();
+            tab.classList.remove('drag-over');
+        });
+
+        tab.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            tab.classList.remove('drag-over');
+            handleDrop(categoryId, e);
+        });
+
         // Handle edit button click
         if (!isAllTab) {
             const editBtn = tab.querySelector('.edit-category-btn');
@@ -242,7 +315,7 @@ function loadCategories() {
             }
         }
     });
-    
+
     // Handle double-click on category names for editing
     document.querySelectorAll('.category-name').forEach(nameEl => {
         nameEl.addEventListener('dblclick', (e) => {
@@ -256,7 +329,7 @@ function loadCategories() {
             }
         });
     });
-    
+
     // Add event listeners to delete buttons
     document.querySelectorAll('.delete-category-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -286,6 +359,93 @@ function deleteCategory(categoryId) {
     }
 }
 
+// Drag and Drop handlers
+function handleDragStart(e) {
+    const bookmarkItem = e.target.closest('.bookmark-item');
+    if (!bookmarkItem) return;
+
+    draggedBookmarkId = bookmarkItem.dataset.bookmarkId;
+    bookmarkItem.classList.add('dragging');
+
+    // Set drag data
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', bookmarkItem.innerHTML);
+}
+
+function handleDragEnd(e) {
+    const bookmarkItem = e.target.closest('.bookmark-item');
+    if (bookmarkItem) {
+        bookmarkItem.classList.remove('dragging');
+    }
+
+    // Remove drag-over class from all category tabs
+    document.querySelectorAll('.category-tab').forEach(tab => {
+        tab.classList.remove('drag-over');
+    });
+}
+
+function handleDrop(targetCategoryId, event) {
+    // Don't do anything if dropping on "All" category
+    if (targetCategoryId === null) {
+        draggedBookmarkId = null;
+        return;
+    }
+
+    // Check if we're dropping an external link
+    if (event && event.dataTransfer) {
+        const url = event.dataTransfer.getData('text/uri-list') ||
+            event.dataTransfer.getData('text/plain');
+        const title = event.dataTransfer.getData('text/html');
+
+        // If we have a URL from external source (not our internal drag)
+        if (url && !draggedBookmarkId) {
+            // Try to extract title from HTML if available
+            let bookmarkName = url;
+            if (title) {
+                const titleMatch = title.match(/<title>(.*?)<\/title>/i) ||
+                    title.match(/>(.*?)</);
+                if (titleMatch && titleMatch[1]) {
+                    bookmarkName = titleMatch[1].trim();
+                }
+            }
+
+            // If no title found, try to extract from URL
+            if (bookmarkName === url) {
+                try {
+                    const urlObj = new URL(url);
+                    bookmarkName = urlObj.hostname.replace('www.', '');
+                } catch (e) {
+                    bookmarkName = url.substring(0, 50);
+                }
+            }
+
+            // Add the new bookmark
+            const newBookmark = dataManager.addBookmark(bookmarkName, url, targetCategoryId);
+            if (newBookmark) {
+                loadBookmarks(currentCategoryId);
+                showNotification(`Added "${bookmarkName}" to category!`);
+            }
+            return;
+        }
+    }
+
+    // Handle internal bookmark drag (existing functionality)
+    if (!draggedBookmarkId) return;
+
+    // Update the bookmark's category
+    const success = dataManager.updateBookmark(draggedBookmarkId, {
+        categoryId: targetCategoryId
+    });
+
+    if (success) {
+        // Reload bookmarks to reflect the change
+        loadBookmarks(currentCategoryId);
+        showNotification('Bookmark moved successfully!');
+    }
+
+    draggedBookmarkId = null;
+}
+
 // Animate bookmarks with a staggered effect
 function animateBookmarks() {
     const bookmarks = document.querySelectorAll('.bookmark-item');
@@ -293,13 +453,13 @@ function animateBookmarks() {
         // Reset initial state
         bookmark.style.opacity = '0';
         bookmark.style.transform = 'scale(0.5)';
-        
+
         // Clear any existing transitions
         bookmark.style.transition = 'none';
-        
+
         // Force reflow to ensure the reset takes effect
         void bookmark.offsetWidth;
-        
+
         // Animate in with staggered delay
         setTimeout(() => {
             bookmark.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
@@ -313,10 +473,10 @@ function animateBookmarks() {
 async function loadBookmarks(categoryId = null) {
     const bookmarks = dataManager.getBookmarks(categoryId);
     const category = categoryId ? dataManager.getCategoryById(categoryId) : null;
-    
+
     // Update current category display
     currentCategoryElement.textContent = category ? category.name : 'All Bookmarks';
-    
+
     if (bookmarks.length === 0) {
         bookmarksGrid.innerHTML = `
             <div class="col-span-full text-center py-12 text-gray-500">
@@ -326,30 +486,16 @@ async function loadBookmarks(categoryId = null) {
         `;
         return;
     }
-    
+
     bookmarksGrid.innerHTML = bookmarks.map(bookmark => `
-        <div class="bookmark-item group relative transform transition-all duration-300 hover:scale-105 hover:z-10" data-bookmark-id="${bookmark.id}">
+        <div class="bookmark-item group relative transform transition-all duration-300 hover:scale-105 hover:z-10 rounded-2xl overflow-hidden" 
+             data-bookmark-id="${bookmark.id}"
+             draggable="true">
             <a href="${bookmark.url}" target="_blank" rel="noopener noreferrer" 
-               class="flex flex-col items-center p-2 bg-gray-950 rounded-5xl
+               class="flex flex-col items-center p-2 bg-gray-950 rounded-2xl
                hover:bg-gray-800/80 transition-all duration-300 h-full border-2 border-transparent hover:border-netflix-red shadow-lg hover:shadow-xl hover:shadow-black/20">
                 <div class="w-16 h-16 mb-3 flex items-center justify-center bg-transparent rounded-lg overflow-hidden transition-all duration-300 group-hover:w-18 group-hover:h-18">
-                    <img 
-                        src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(bookmark.url)}&sz=256" 
-                        alt="" 
-                        class="w-12 h-12 rounded-3xl object-contain"
-                        onerror="this.onerror=null; 
-                            this.src='https://icons.duckduckgo.com/ip2/' + new URL(bookmark.url).hostname + '.ico';
-                            this.onerror=function(){ 
-                                this.onerror=null; 
-                                this.src='https://' + new URL(bookmark.url).hostname + '/favicon.ico';
-                                this.onerror=function(){ 
-                                    this.onerror=null; 
-                                    this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2U1MDkxNCIgZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bS0xIDE4aDJ2LTJoLTJ2MnptMi4wNy03Ljc1bC0uOS45MkMxMS40NSAxMy4xMSAxMSAxMy41MSAxIDE0aC0ydi0uNk0xMSA1aDJ2NmgtMlY1eiIvPjwvc3ZnPg==';
-                                };
-                            };
-                        "
-                        loading="lazy"
-                    />
+                    ${getFaviconHTML(bookmark, false)}
                 </div>
                 <span class="text-sm text-center text-gray-300 group-hover:text-white font-medium truncate w-full transform transition-all duration-300 group-hover:scale-110">${bookmark.name}</span>
             </a>
@@ -365,12 +511,18 @@ async function loadBookmarks(categoryId = null) {
             </div>
         </div>
     `).join('');
-    
+
     // Animate the bookmarks after they're added to the DOM
     requestAnimationFrame(() => {
         animateBookmarks();
     });
-    
+
+    // Add drag event listeners to bookmarks
+    document.querySelectorAll('.bookmark-item').forEach(item => {
+        item.addEventListener('dragstart', handleDragStart);
+        item.addEventListener('dragend', handleDragEnd);
+    });
+
     // Add event listeners to bookmark actions
     document.querySelectorAll('.edit-bookmark').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -380,7 +532,7 @@ async function loadBookmarks(categoryId = null) {
             editBookmark(bookmarkId);
         });
     });
-    
+
     document.querySelectorAll('.delete-bookmark').forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
@@ -393,7 +545,7 @@ async function loadBookmarks(categoryId = null) {
             );
         });
     });
-    
+
     // Add click handler for bookmark links to track usage
     document.querySelectorAll('.bookmark-item > a').forEach(link => {
         link.addEventListener('click', (e) => {
@@ -401,13 +553,13 @@ async function loadBookmarks(categoryId = null) {
             if (e.target.closest('.delete-bookmark') || e.target.closest('.edit-bookmark')) {
                 return;
             }
-            
+
             const bookmarkItem = link.closest('.bookmark-item');
             const bookmarkId = bookmarkItem.dataset.bookmarkId;
             if (bookmarkId) {
                 trackBookmarkUsage(bookmarkId);
             }
-            
+
             // Add a visual feedback class
             bookmarkItem.classList.add('clicked');
             setTimeout(() => {
@@ -421,7 +573,7 @@ async function loadBookmarks(categoryId = null) {
 function openCategoryModal(categoryId = null) {
     editMode.active = !!categoryId;
     editMode.id = categoryId;
-    
+
     if (categoryId) {
         // Edit mode
         const category = dataManager.getCategoryById(categoryId);
@@ -434,7 +586,7 @@ function openCategoryModal(categoryId = null) {
         categoryNameInput.value = '';
         document.querySelector('#categoryForm button[type="submit"]').textContent = 'Add Category';
     }
-    
+
     openModal(categoryModal);
     categoryNameInput.focus();
 }
@@ -442,9 +594,9 @@ function openCategoryModal(categoryId = null) {
 function handleCategorySubmit(e) {
     e.preventDefault();
     const name = categoryNameInput.value.trim();
-    
+
     if (!name) return;
-    
+
     if (editMode.active && editMode.id) {
         // Update existing category
         const success = dataManager.updateCategory(editMode.id, name);
@@ -469,13 +621,13 @@ function handleCategorySubmit(e) {
 function openBookmarkModal(bookmarkId = null) {
     // Populate categories dropdown
     const categories = dataManager.getCategories();
-    bookmarkCategorySelect.innerHTML = categories.map(cat => 
+    bookmarkCategorySelect.innerHTML = categories.map(cat =>
         `<option value="${cat.id}">${cat.name}</option>`
     ).join('');
-    
+
     editMode.active = !!bookmarkId;
     editMode.id = bookmarkId;
-    
+
     if (bookmarkId) {
         // Edit mode
         const bookmark = dataManager.getBookmarkById(bookmarkId);
@@ -494,20 +646,20 @@ function openBookmarkModal(bookmarkId = null) {
         document.querySelector('#bookmarkForm button[type="submit"]').textContent = 'Add Bookmark';
         document.getElementById('bookmarkModalTitle').textContent = 'Add New Bookmark';
     }
-    
+
     openModal(bookmarkModal);
     bookmarkNameInput.focus();
 }
 
 function handleBookmarkSubmit(e) {
     e.preventDefault();
-    
+
     const name = bookmarkNameInput.value.trim();
     const url = bookmarkUrlInput.value.trim();
     const categoryId = bookmarkCategorySelect.value;
-    
+
     if (!name || !url || !categoryId) return;
-    
+
     if (editMode.active && editMode.id) {
         // Update existing bookmark
         const success = dataManager.updateBookmark(editMode.id, { name, url, categoryId });
@@ -567,34 +719,34 @@ document.addEventListener('DOMContentLoaded', () => {
 function setupImportExport() {
     const exportBtn = document.getElementById('exportBtn');
     const importFile = document.getElementById('importFile');
-    
+
     // Export functionality
     exportBtn.addEventListener('click', () => {
         const { dataUrl, fileName } = dataManager.exportData();
-        
+
         // Create a temporary link to trigger the download
         const a = document.createElement('a');
         a.href = dataUrl;
         a.download = fileName;
         document.body.appendChild(a);
         a.click();
-        
+
         // Clean up
         setTimeout(() => {
             document.body.removeChild(a);
             URL.revokeObjectURL(dataUrl);
         }, 0);
     });
-    
+
     // Import functionality
     importFile.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        
+
         const reader = new FileReader();
         reader.onload = (event) => {
             const fileContent = event.target.result;
-            
+
             showConfirmDialog(
                 'Import Bookmarks',
                 'This will replace all your current bookmarks and categories. Are you sure?',
@@ -611,7 +763,7 @@ function setupImportExport() {
             );
         };
         reader.readAsText(file);
-        
+
         // Reset the input so the same file can be imported again
         importFile.value = '';
     });
@@ -621,24 +773,24 @@ function setupImportExport() {
 function startEditingCategory(categoryId, tabElement) {
     const category = dataManager.getCategoryById(categoryId);
     if (!category) return;
-    
+
     const nameElement = tabElement.querySelector('.category-name');
     const originalName = category.name;
-    
+
     // Create and style the input field
     const input = document.createElement('input');
     input.type = 'text';
     input.value = originalName;
     input.className = 'bg-transparent border-b border-white text-white focus:outline-none focus:border-netflix-red w-full';
-    
+
     // Replace the name with the input field
     nameElement.style.display = 'none';
     tabElement.insertBefore(input, nameElement);
-    
+
     // Focus and select all text
     input.focus();
     input.select();
-    
+
     // Handle Enter key to save
     const handleKeyDown = (e) => {
         if (e.key === 'Enter') {
@@ -647,18 +799,18 @@ function startEditingCategory(categoryId, tabElement) {
             cancelEdit();
         }
     };
-    
+
     // Handle click outside to save
     const handleClickOutside = (e) => {
         if (!tabElement.contains(e.target)) {
             saveCategoryEdit();
         }
     };
-    
+
     // Save the edit
     const saveCategoryEdit = () => {
         const newName = input.value.trim();
-        
+
         if (newName && newName !== originalName) {
             const success = dataManager.updateCategory(categoryId, newName);
             if (success) {
@@ -668,22 +820,22 @@ function startEditingCategory(categoryId, tabElement) {
                 return;
             }
         }
-        
+
         // If save failed or name didn't change, revert
         nameElement.style.display = '';
         input.remove();
     };
-    
+
     // Cancel editing
     const cancelEdit = () => {
         nameElement.style.display = '';
         input.remove();
     };
-    
+
     // Add event listeners
     input.addEventListener('keydown', handleKeyDown);
     document.addEventListener('click', handleClickOutside, { once: true });
-    
+
     // Clean up
     input.addEventListener('blur', () => {
         document.removeEventListener('click', handleClickOutside);
@@ -697,19 +849,18 @@ function showNotification(message, type = 'success') {
     if (existingNotification) {
         existingNotification.remove();
     }
-    
+
     const notification = document.createElement('div');
-    notification.className = `notification fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg ${
-        type === 'success' ? 'bg-green-600' : 'bg-red-600'
-    } text-white flex items-center space-x-2`;
-    
+    notification.className = `notification fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg ${type === 'success' ? 'bg-green-600' : 'bg-red-600'
+        } text-white flex items-center space-x-2`;
+
     notification.innerHTML = `
         <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
         <span>${message}</span>
     `;
-    
+
     document.body.appendChild(notification);
-    
+
     // Auto-remove after 3 seconds
     setTimeout(() => {
         notification.classList.add('opacity-0', 'transition-opacity', 'duration-300');

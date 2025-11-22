@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -21,7 +22,9 @@
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css">
 </head>
+
 <body class="bg-black text-white min-h-screen text-base md:text-lg">
     <div class="w-full min-h-screen bg-black px-4 sm:px-6 lg:px-8 py-5">
         <!-- Header -->
@@ -38,36 +41,40 @@
                 <!-- Frequently used bookmarks will be inserted here -->
             </div>
         </div>
-        
+
         <!-- Categories Navigation -->
         <div class="mb-8">
-        
+
             <div id="categoriesContainer" class="flex flex-wrap gap-2 pb-2">
                 <!-- Categories will be dynamically inserted here -->
             </div>
             <div class="flex items-center justify-between mb-4">
-          
-                <button id="addCategoryBtn" class="bg-netflix-red hover:bg-red-700 text-white px-5 py-2.5 rounded-lg transition-colors text-base md:text-lg">
+
+                <button id="addCategoryBtn"
+                    class="bg-netflix-red hover:bg-red-700 text-white px-5 py-2.5 rounded-lg transition-colors text-base md:text-lg">
                     <i class="fas fa-plus mr-2"></i>Add Category
                 </button>
-          
-            <div class="flex space-x-2">
-                <button id="exportBtn" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-base transition-colors">
-                    <i class="fas fa-file-export mr-1"></i> Export
-                </button>
-                <label for="importFile" class="cursor-pointer bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-base transition-colors">
-                    <i class="fas fa-file-import mr-1"></i> Import
-                    <input type="file" id="importFile" accept=".json" class="hidden" />
-                </label>
+
+                <div class="flex space-x-2">
+                    <button id="exportBtn"
+                        class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-base transition-colors">
+                        <i class="fas fa-file-export mr-1"></i> Export
+                    </button>
+                    <label for="importFile"
+                        class="cursor-pointer bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-base transition-colors">
+                        <i class="fas fa-file-import mr-1"></i> Import
+                        <input type="file" id="importFile" accept=".json" class="hidden" />
+                    </label>
+                </div>
             </div>
-              </div>
         </div>
 
         <!-- Bookmarks Grid -->
         <div>
             <div class="flex items-center justify-between mb-4">
                 <h2 id="currentCategory" class="text-xl font-semibold">All Bookmarks</h2>
-                <button id="addBookmarkBtn" class="bg-netflix-red hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors">
+                <button id="addBookmarkBtn"
+                    class="bg-netflix-red hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors">
                     <i class="fas fa-bookmark mr-2"></i>Add Bookmark
                 </button>
             </div>
@@ -89,11 +96,12 @@
             <form id="categoryForm" class="space-y-4">
                 <div>
                     <label for="categoryName" class="block text-sm font-medium mb-1">Category Name</label>
-                    <input type="text" id="categoryName" required 
-                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-netflix-red">
+                    <input type="text" id="categoryName" required
+                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-netflix-red">
                 </div>
                 <div class="flex justify-end space-x-3">
-                    <button type="button" id="cancelCategory" class="px-4 py-2 rounded-lg border border-gray-600 hover:bg-gray-800">
+                    <button type="button" id="cancelCategory"
+                        class="px-4 py-2 rounded-lg border border-gray-600 hover:bg-gray-800">
                         Cancel
                     </button>
                     <button type="submit" class="bg-netflix-red hover:bg-red-700 text-white px-4 py-2 rounded-lg">
@@ -116,24 +124,25 @@
             <form id="bookmarkForm" class="space-y-4">
                 <div>
                     <label for="bookmarkName" class="block text-sm font-medium mb-1">Name</label>
-                    <input type="text" id="bookmarkName" required 
-                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-netflix-red">
+                    <input type="text" id="bookmarkName" required
+                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-netflix-red">
                 </div>
                 <div>
                     <label for="bookmarkUrl" class="block text-sm font-medium mb-1">URL</label>
-                    <input type="url" id="bookmarkUrl" required 
-                           class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-netflix-red"
-                           placeholder="https://example.com">
+                    <input type="url" id="bookmarkUrl" required
+                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-netflix-red"
+                        placeholder="https://example.com">
                 </div>
                 <div>
                     <label for="bookmarkCategory" class="block text-sm font-medium mb-1">Category</label>
-                    <select id="bookmarkCategory" required 
-                            class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-netflix-red">
+                    <select id="bookmarkCategory" required
+                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-netflix-red">
                         <!-- Categories will be populated by JavaScript -->
                     </select>
                 </div>
                 <div class="flex justify-end space-x-3">
-                    <button type="button" id="cancelBookmark" class="px-4 py-2 rounded-lg border border-gray-600 hover:bg-gray-800">
+                    <button type="button" id="cancelBookmark"
+                        class="px-4 py-2 rounded-lg border border-gray-600 hover:bg-gray-800">
                         Cancel
                     </button>
                     <button type="submit" class="bg-netflix-red hover:bg-red-700 text-white px-4 py-2 rounded-lg">
@@ -166,4 +175,5 @@
     <script src="dataManager.js"></script>
     <script src="app.js"></script>
 </body>
+
 </html>
