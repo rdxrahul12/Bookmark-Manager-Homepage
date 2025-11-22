@@ -228,6 +228,15 @@ function setupEventListeners() {
         if (e.target === bookmarkModal) closeModal(bookmarkModal);
         if (e.target === confirmModal) closeModal(confirmModal);
     });
+
+    // Theme toggle
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+        themeToggle.addEventListener('click', toggleTheme);
+    }
+
+    // Load saved theme
+    loadTheme();
 }
 
 // Load and display categories
@@ -867,3 +876,25 @@ function showNotification(message, type = 'success') {
         setTimeout(() => notification.remove(), 300);
     }, 3000);
 }
+
+// Theme toggle functions
+function toggleTheme() {
+    const body = document.body;
+    const isLightMode = body.classList.contains('light-mode');
+
+    if (isLightMode) {
+        body.classList.remove('light-mode');
+        localStorage.setItem('theme', 'dark');
+    } else {
+        body.classList.add('light-mode');
+        localStorage.setItem('theme', 'light');
+    }
+}
+
+function loadTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-mode');
+    }
+}
+
