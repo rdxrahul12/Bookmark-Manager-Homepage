@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Bookmark Manager Homepage",
+  "short_name": "Bookmarks",
+  "version": "2.0.0",
+  "description": "A beautiful offline bookmark manager with Netflix-inspired design. Drag & drop bookmarks, offline-first with fallback icons.",
+  "icons": {
+    "192": "icon-192.png",
+    "512": "icon-512.png"
+  },
+  "chrome_url_overrides": {
+    "newtab": "index.html"
+  },
+  "permissions": [
+    "storage"
+  ],
+  "background": {
+    "service_worker": "sw.js"
+  },
+  "action": {
+    "default_title": "Bookmark Manager"
+  }
+}

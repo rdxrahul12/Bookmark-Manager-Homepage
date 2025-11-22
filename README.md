@@ -1,52 +1,174 @@
-# Offline Bookmark Manager
-Use : https://rdxrahul12.github.io/Bookmark-Manager-Homepage/
-<img width="1902" height="1076" alt="image" src="https://github.com/user-attachments/assets/741b0211-e730-4151-98af-12c5ae439ff8" />
+# 🔖 Bookmark Manager
 
+<div align="center">
 
-A beautiful, Netflix-inspired bookmark manager that works offline. Organize your bookmarks by categories and access them quickly with a clean, modern interface.
+![Bookmark Manager Light Mode](screenshot-light.png)
 
-## How to use
-- download zip, extract
-- make the index.html as home page
-- download new tab redirect
-- add page
-- Enjoy new Homepage
+**A beautiful, feature-rich bookmark manager that replaces your Chrome new tab page**
 
-## Features
+[![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-4285F4?logo=googlechrome&logoColor=white)](https://github.com/rdxrahul12/Bookmark-Manager-Homepage/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Live Demo](https://img.shields.io/badge/Demo-Live-success)](https://rdxrahul12.github.io/Bookmark-Manager-Homepage/)
 
-- 🏷️ Categorize bookmarks for better organization
-- 🌐 Works offline (PWA support)
-- 🎨 Netflix-inspired dark theme
-- 📱 Fully responsive design
-- ⚡ Fast and lightweight
-- 🔄 Real-time updates
-- 📥 Export/Import bookmarks (coming soon)
+[Features](#features) • [Installation](#installation) • [Usage](#usage) • [Contributing](#contributing)
 
-## Getting Started
+</div>
 
-1. Clone this repository or download the files
-2. Open `index.html` in your browser
-3. Start adding your favorite websites!
+---
 
-## Usage
+## ✨ Features
 
-- Click "Add Category" to create a new category
-- Click "Add Bookmark" to add a new bookmark
-- Click on a category to filter bookmarks
-- Right-click on a category to edit or delete it
-- Click the icons on bookmarks to edit or delete them
+### 🎯 **Smart Organization**
+- **Drag & Drop**: Effortlessly move bookmarks between categories
+- **Quick Add**: Drag browser tabs or webpage links directly into categories
+- **Category Management**: Create, edit, and organize unlimited categories
 
-## Browser Support
+### 🌓 **Beautiful Themes**
+- **Light/Dark Mode**: Toggle with animated sun/moon button
+- **Rose-Tinted Light Theme**: Soft pink gradients (#fff5f7, #ffe4e9)
+- **Netflix-Inspired Dark Theme**: Sleek black with signature red accents
+- **Smooth Transitions**: All components animate beautifully between themes
 
-- Chrome (recommended)
-- Firefox
-- Edge
-- Safari (limited PWA support)
+### 🎨 **Smart Icons**
+- **Auto-Generated Fallback Icons**: Beautiful gradient icons with initials
+- **Consistent Colors**: Same site always gets the same color scheme
+- **Works Offline**: Icons generated locally when favicons fail
 
-## License
+### 💾 **Offline-First**
+- **Local Storage**: All data stored on your device
+- **No Internet Required**: Works completely offline
+- **Privacy-Focused**: No tracking, no external servers
+- **Import/Export**: Backup and restore your bookmarks
 
-This project is open source and available under the [MIT License](LICENSE).
+### ⚡ **Performance**
+- **Lightweight**: Fast loading and smooth interactions
+**Method 1: Manual Add**
+1. Click **"Add Bookmark"** button
+2. Enter name and URL
+3. Select a category
+4. Save!
 
-## Contributing
+**Method 2: Drag & Drop**
+- Drag a browser tab onto any category
+- Drag a link from a webpage onto a category
+- The bookmark is created automatically with the page title!
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+### Managing Categories
+
+- **Create**: Click "Add Category" button
+- **Edit**: Click the edit icon on any category tab
+- **Delete**: Click the X icon on a category tab
+- **Reorder**: Categories appear in the order you create them
+
+### Organizing Bookmarks
+
+- **Move**: Drag bookmarks between categories
+- **Edit**: Click the edit icon on any bookmark
+- **Delete**: Click the trash icon on any bookmark
+- **Filter**: Click a category to view only those bookmarks
+
+### Theme Toggle
+
+Click the sun/moon button next to the title to switch between light and dark modes. Your preference is saved automatically!
+
+---
+
+## 🛠️ Development
+
+### Tech Stack
+
+- **Frontend**: Vanilla JavaScript (ES6+)
+- **Styling**: Tailwind CSS + Custom CSS
+- **Storage**: localStorage API
+- **PWA**: Service Worker for offline support
+- **Icons**: Font Awesome + Generated fallbacks
+
+### Project Structure
+
+```
+├── index.html          # Main HTML file
+├── app.js             # Application logic
+├── dataManager.js     # Data persistence layer
+├── styles.css         # Custom styles
+├── sw.js              # Service worker
+├── manifest.json      # Extension/PWA manifest
+└── README.md          # This file
+```
+
+### Local Development
+
+```bash
+# Clone the repository
+git clone https://github.com/rdxrahul12/Bookmark-Manager-Homepage.git
+
+# Navigate to directory
+cd Bookmark-Manager-Homepage
+
+# Serve locally (any static server works)
+npx serve .
+
+# Open in browser
+# Visit http://localhost:3000
+```
+
+### Building for Distribution
+
+```powershell
+# Create extension package
+mkdir extension-package
+Copy-Item manifest.json,index.html,app.js,dataManager.js,styles.css,sw.js extension-package\
+Compress-Archive -Path extension-package\* -DestinationPath bookmark-manager-extension.zip -Force
+```
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Here's how you can help:
+
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/AmazingFeature`)
+3. **Commit** your changes (`git commit -m 'Add some AmazingFeature'`)
+4. **Push** to the branch (`git push origin feature/AmazingFeature`)
+5. **Open** a Pull Request
+
+### Ideas for Contributions
+
+- 🌐 Multi-language support
+- 🔍 Search functionality
+- 📊 Usage statistics
+- 🎨 More theme options
+- ☁️ Cloud sync option
+- 📱 Mobile app version
+
+---
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+- Inspired by Netflix's UI design
+- Icons by [Font Awesome](https://fontawesome.com/)
+- Built with ❤️ for productivity enthusiasts
+
+---
+
+## 📞 Support
+
+- **Issues**: [Report a bug](https://github.com/rdxrahul12/Bookmark-Manager-Homepage/issues)
+- **Discussions**: [Join the conversation](https://github.com/rdxrahul12/Bookmark-Manager-Homepage/discussions)
+- **Documentation**: [Installation Guide](QUICK-START.md)
+
+---
+
+<div align="center">
+
+**Made with ❤️ by [rdxrahul12](https://github.com/rdxrahul12)**
+
+⭐ Star this repo if you find it useful!
+
+</div>

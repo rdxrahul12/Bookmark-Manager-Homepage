@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline Bookmark Manager</title>
+    <meta name="theme-color" content="#000000">
+    <meta name="description" content="A beautiful offline bookmark manager with Netflix-inspired design">
+    <link rel="manifest" href="/manifest.json">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'netflix-red': '#e50914',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="bg-black text-white min-h-screen text-base md:text-lg">
+    <div class="w-full min-h-screen bg-black px-4 sm:px-6 lg:px-8 py-5">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-6">
+            <div class="flex items-center gap-4">
+                <h1 class="text-2xl md:text-3xl font-bold text-netflix-red">Bookmark Manager</h1>
+                <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">
+                    <i class="fas fa-sun sun-icon"></i>
+                    <i class="fas fa-moon moon-icon"></i>
+                </button>
+            </div>
+            <div id="dateTimeDisplay" class="text-gray-100 font-mono px-4 hidden sm:flex items-center text-lg">
+                <span id="day" class="font-extrabold text-2xl">Sunday</span>
+                <span class="mx-1 text-gray-500">,</span>
+                <span id="time" class="text-netflix-red font-extrabold text-2xl">12:00 AM</span>
+                <span class="mx-1 text-gray-500">,</span>
+                <span id="date" class="font-extrabold text-2xl">21/07/2025</span>
+            </div>
+            <div class="flex items-center space-x-2" id="frequentlyUsed">
+                <!-- Frequently used bookmarks will be inserted here -->
+            </div>
+        </div>
+
+        <!-- Categories Navigation -->
+        <div class="mb-8">
+
+            <div id="categoriesContainer" class="flex flex-wrap gap-2 pb-2">
+                <!-- Categories will be dynamically inserted here -->
+            </div>
+            <div class="flex items-center justify-between mb-4">
+
+                <button id="addCategoryBtn"
+                    class="bg-netflix-red hover:bg-red-700 text-white px-5 py-2.5 rounded-lg transition-colors text-base md:text-lg">
+                    <i class="fas fa-plus mr-2"></i>Add Category
+                </button>
+
+                <div class="flex space-x-2">
+                    <button id="exportBtn"
+                        class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-base transition-colors">
+                        <i class="fas fa-file-export mr-1"></i> Export
+                    </button>
+                    <label for="importFile"
+                        class="cursor-pointer bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-base transition-colors">
+                        <i class="fas fa-file-import mr-1"></i> Import
+                        <input type="file" id="importFile" accept=".json" class="hidden" />
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bookmarks Grid -->
+        <div>
+            <div class="flex items-center justify-between mb-4">
+                <h2 id="currentCategory" class="text-xl font-semibold">All Bookmarks</h2>
+                <button id="addBookmarkBtn"
+                    class="bg-netflix-red hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-bookmark mr-2"></i>Add Bookmark
+                </button>
+            </div>
+            <div id="bookmarksGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                <!-- Bookmarks will be dynamically inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Category Modal -->
+    <div id="categoryModal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center hidden">
+        <div class="bg-gray-900 p-6 rounded-lg w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold">Add New Category</h3>
+                <button id="closeCategoryModal" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+            <form id="categoryForm" class="space-y-4">
+                <div>
+                    <label for="categoryName" class="block text-sm font-medium mb-1">Category Name</label>
+                    <input type="text" id="categoryName" required
+                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-netflix-red">
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" id="cancelCategory"
+                        class="px-4 py-2 rounded-lg border border-gray-600 hover:bg-gray-800">
+                        Cancel
+                    </button>
+                    <button type="submit" class="bg-netflix-red hover:bg-red-700 text-white px-4 py-2 rounded-lg">
+                        Save Category
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit Bookmark Modal -->
+    <div id="bookmarkModal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center hidden">
+        <div class="bg-gray-900 p-6 rounded-lg w-full max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="bookmarkModalTitle" class="text-xl font-semibold">Add New Bookmark</h3>
+                <button id="closeBookmarkModal" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+            <form id="bookmarkForm" class="space-y-4">
+                <div>
+                    <label for="bookmarkName" class="block text-sm font-medium mb-1">Name</label>
+                    <input type="text" id="bookmarkName" required
+                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-netflix-red">
+                </div>
+                <div>
+                    <label for="bookmarkUrl" class="block text-sm font-medium mb-1">URL</label>
+                    <input type="url" id="bookmarkUrl" required
+                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-netflix-red"
+                        placeholder="https://example.com">
+                </div>
+                <div>
+                    <label for="bookmarkCategory" class="block text-sm font-medium mb-1">Category</label>
+                    <select id="bookmarkCategory" required
+                        class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-netflix-red">
+                        <!-- Categories will be populated by JavaScript -->
+                    </select>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" id="cancelBookmark"
+                        class="px-4 py-2 rounded-lg border border-gray-600 hover:bg-gray-800">
+                        Cancel
+                    </button>
+                    <button type="submit" class="bg-netflix-red hover:bg-red-700 text-white px-4 py-2 rounded-lg">
+                        Save Bookmark
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center hidden">
+        <div class="bg-gray-900 p-6 rounded-lg w-full max-w-md">
+            <div class="text-center">
+                <i class="fas fa-exclamation-triangle text-yellow-500 text-4xl mb-4"></i>
+                <h3 id="confirmTitle" class="text-xl font-semibold mb-2">Are you sure?</h3>
+                <p id="confirmMessage" class="text-gray-300 mb-6">This action cannot be undone.</p>
+                <div class="flex justify-center space-x-4">
+                    <button id="confirmCancel" class="px-6 py-2 rounded-lg border border-gray-600 hover:bg-gray-800">
+                        Cancel
+                    </button>
+                    <button id="confirmAction" class="bg-netflix-red hover:bg-red-700 text-white px-6 py-2 rounded-lg">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="dataManager.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
